@@ -65,6 +65,10 @@ I am trying to get a better understanding of these things by explaining them in 
   - [Defining the `.push()` method](#defining-the-push-method)
   - [Defining the `.pop()` method](#defining-the-pop-method)
   - [Defining the `.filter()` method](#defining-the-filter-method)
+  - [Other higher order functions](#other-higher-order-functions)
+    - [Defining the `.map()` method](#defining-the-map-method)
+    - [Defining the `.find()` method](#defining-the-find-method)
+    - [Defining the `.reduce()` method](#defining-the-reduce-method)
 
 <br>
 
@@ -721,3 +725,56 @@ array.prototype.filter = function (cb) {
   return results;
 }
 ```
+
+## Other higher order functions
+
+Let's give this a try: implementing some of  the more common array higher order functions.
+
+### Defining the `.map()` method
+
+```js
+array.prototype.map = function (cb) {
+  // result will be a new array
+  let results = array();
+
+  for (let index in this) {
+    // making sure the property belongs to this instance
+    if (this.hasOwnProperty(index)) {
+      const element = this[index];
+
+      // assign whatever is returned from the cb
+      results.push(cb(element, index));
+    }
+  }
+
+  return results;
+}
+```
+
+### Defining the `.find()` method
+
+```js
+array.prototype.find = function (cb) {
+  // result will be a new array
+  let results = array();
+
+  for (let index in this) {
+    // making sure the property belongs to this instance
+    if (this.hasOwnProperty(index)) {
+      const element = this[index];
+
+      // if cb resolves to true, return and end
+      if (cb(element, index)) return element;
+    }
+  }
+
+  // if nothing was found, return undefined
+  return undefined;
+}
+```
+
+### Defining the `.reduce()` method
+
+[MDN docs for `reduce()` method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce)
+
+This one will be trickier but really useful to understand and remember the method well. TBD.
