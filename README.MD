@@ -732,6 +732,8 @@ Let's give this a try: implementing some of  the more common array higher order 
 
 ### Defining the `.map()` method
 
+The map method will iterate every value in the array and return a new array with every value passed through a callback function.
+
 ```js
 array.prototype.map = function (cb) {
   // result will be a new array
@@ -752,6 +754,8 @@ array.prototype.map = function (cb) {
 ```
 
 ### Defining the `.find()` method
+
+Iterates through the array values, runs the value through a callback and returns the first value that resolves to true.
 
 ```js
 array.prototype.find = function (cb) {
@@ -777,4 +781,43 @@ array.prototype.find = function (cb) {
 
 [MDN docs for `reduce()` method](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/Reduce)
 
-This one will be trickier but really useful to understand and remember the method well. TBD.
+IMO this is the hardest array method to understand, so it is great practice to break down the functionality of it a little bit.
+
+The reduce method can be passed two arguments:
+- The reducer callback function *(required)*
+- An initial value *(optional, defaults to 0)*
+
+The reducer callback function can be passed four arguments:
+1. Accumulator (`acc`) *(required)*
+   - The value of the accumulator persists through each iteration, and is eventually what gets returned
+2. Current value (`cur`) *(required)*
+   - The current value in the iteration
+3. Current index (`idx`) *(optional)*
+   - The current index in the iteration
+4. Source array (`src`) *(optional)*
+   - The original array that the reduce method is being run on
+
+```js
+array.prototype.reduce = function (reducer, initialValue) {
+  // define the source array
+  const src = this;
+  // accumulator is derived from initialValue
+  let acc = initialValue || 0;
+
+  for (let idx in this) {
+    // making sure the property belongs to this instance
+    if (this.hasOwnProperty(idx)) {
+      // define current value
+      const cur = this[idx];
+
+      // all variables are now set
+      // run the reducer on accumulator
+      acc = reducer(acc, cur, idx, src);
+    }
+  }
+  // return the accumulator
+  return acc;
+}
+```
+
+🙌 🚀
