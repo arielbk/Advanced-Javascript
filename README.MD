@@ -1,11 +1,11 @@
 # Advanced JavaScript
 Following along with Tyler McGinnis' [*Advanced JavaScript*](https://tylermcginnis.com/courses/advanced-javascript/) tutorial series.
 
-These are just intended as supplementary materials. Go check out the course! Tyler McGinnis has a teaching style where he will go into the details of why things are the way they are in JavaScript, 'look under the hood', but at the same time has a way of getting confusing concepts across simply.
+These are just intended as supplementary materials. Go check out the course! Tyler McGinnis has a teaching style where he will go into the details of why things are the way they are in JavaScript, 'look under the hood', but at the same time gets confusing concepts across simply.
 
-There are also [blog posts](https://tylermcginnis.com/blog/) on most of these concepts, which probably do a better job of explaining some of these things than I do here.
+There are also Tyler's [blog posts](https://tylermcginnis.com/blog/), which probably do a better job of going into some of these concepts than I do here.
 
-I am trying to get a better understanding of these things by explaining them in my own terms and putting them in context. Most, apart from the most essential, code examples have been changed.
+I am trying to get a better understanding by explaining things in my own terms and putting them in context. Most of the code examples have been changed somewhat.
 
 <br>
 
@@ -20,6 +20,7 @@ I am trying to get a better understanding of these things by explaining them in 
   - [The execution stack](#the-execution-stack)
   - [Scope](#scope)
   - [Closures](#closures)
+    - [Currying](#currying)
 - [The `this` keyword in JavaScript](#the-this-keyword-in-javascript)
   - [Implicit binding](#implicit-binding)
   - [Explicit binding](#explicit-binding)
@@ -82,12 +83,12 @@ The JavaScript engine first goes through a 'creation' phase, and then through an
 
 ### The **creation** phase:
 - All declared variables are first assigned an `undefined` value.
-- All functions in context are saved in memory.<br />
-- The `this` keyword for the current context is also set.
+- All functions in the current context are saved in memory.<br />
+- The `this` keyword for the current context is set.
 
-Apart from this, somthing else will happen depending on the context:
-- In the global context the creation phase will declase and assign a `global` or `window` object (depending on the environment).
-- In a function context the creation phase will assign an `arguments` keyword object.
+Apart from that, something else will happen:
+- In the **global context** the creation phase will declare and assign a `global` or `window` object (depending on the environment).
+- In a **function context** the creation phase will assign an `arguments` keyword object.
 
 ```js
 console.log('name: ', name);
@@ -117,12 +118,16 @@ getDetails:  ƒ getDetails() {
  
 ### The **execution** phase
 
-After the creation phase, the execution phase happens. This is where functions are invoked and each function has it's own function context. So the process repeats, the creation phase begins in the context of the function.
+After the creation phase, the execution phase happens. This is where functions are invoked and each function has it's own function context.
+
+So the process repeats, the creation phase begins in the context of the function and the JavaScript engine drills down into different functions, invoking them and creating new function contexts.
 
 
 ## The execution stack
 
-So, as the execution context of a function is happening the context outside of it is still in process, in the execution phase... this is the execution stack.
+So, as the execution context of a function happens the context outside of it is still in process, in the execution phase... this is the execution stack.
+
+As the engine drills down, this *'stack'* builds up.
 
 [JavaScript Visualizer](https://tylermcginnis.com/javascript-visualizer) is the best way to actually visualise this.
 
@@ -132,7 +137,7 @@ This is where we get scope. If we call a variable inside of a function, the JS e
 
 If it cannot find that variable it will look to the execution context above it in the stack (the parent scope).
 
-If it still cannot find the variable in the global scope, only then will a `TypeError` be thrown.
+If it still cannot find the variable in the global scope, then a `TypeError` will be thrown.
 
 ## Closures
 
@@ -151,17 +156,35 @@ function makeAdder (x) {
 
  addTwo(3); // returns 5
 ```
-The inner function (`adder`) has a closure over execution context of the outer function (`makeAdder`). That is, a new *closure scope* is created.
+The inner function (`adder`) has a closure over the execution context of the outer function (`makeAdder`). That is, a new *closure scope* is created when `makeAdder` is invoked.
 
-So, 2 is passed into the `makeAdder` function as the value of x. That value is saved in its own closure scope as the value for x whenever the returned function is called (since it is assigned to the variable `addTwo`).
+So, `2` is passed into the `makeAdder` function as the value of `x`. That value is saved in its own closure scope as the value for `x` whenever the returned function is called (since it is assigned to the variable `addTwo`).
 
-Run it through the [JavaScript Visualizer](https://tylermcginnis.com/javascript-visualizer)!
+Run it through the [JavaScript Visualizer](https://tylermcginnis.com/javascript-visualizer) to get a more visual explanation of this!
+
+### Currying
+
+Check out [these Quora answer](https://www.quora.com/Is-there-any-difference-between-currying-and-closure-in-JavaScript) to get a bit more of an idea about currying in JavaScript.
+
+Currying is a functional programming concept in which you can pass in arguments to a function one by one. Unlike other pure functional languages, JavaScript cannot do this natively. But with closures, it is kind of possible.
+
+A pattern that I have seen is using arrow functions to do this, some people seem to hate it:
+
+```js
+let person =
+  name =>
+    age =>
+      location =>
+        console.log(`${name} is a ${age} year old person, their location is ${location}`);
+
+person('arielbk')(27)('Croatia'); // logs 'arielbk is a 27 year old person, their current location is Croatia'
+```
 
 <br>
 
 # The `this` keyword in JavaScript
 
-What the `this` keyword *is* all depends on *where the function is invoked.*
+The value of `this` all depends on *where the function is invoked.* That's basically the most important thing to remember about it.
 
 ## Implicit binding
 
@@ -179,13 +202,13 @@ dog.makeNoise(); // logs 'Bark!'
 ```
 
 ## Explicit binding
-This takes precedence over implicit binding.
+Explicit binding takes precedence over implicit binding.
 
 ### the `.call()` method
 ```js
 myFunction.call(myObj, arg1, arg2, arg3);
 ```
-This calls the `myFunction` function with explicit binding to `myObj` (so `this` refers to `myObj`). The next arguments are passed to the original function separately.
+This invokes `myFunction` with explicit binding to `myObj` (so `this` refers to `myObj`). The next arguments are passed to the original function separately.
 
 ### `.apply()` method
 Just like the `.call()` method, except the arguments are passed in one array:
@@ -195,7 +218,7 @@ myFunction.call(myObj, [arg1, arg2, arg3]);
 
 ### `.bind()` method
 Same as `.call()` except it returns a new bound function.<br>
-This would be useful for when we want to reuse the bound function again; think back to the React pattern of binding functions in the constructor. 
+This would be useful for when we want to reuse the bound function again; think back to the React pattern of binding methods in the class constructor. 
 
 ## `new` binding
 
@@ -205,7 +228,7 @@ Creating an object from a constructor using the `new` keyword automatically assi
 
 This is not great, but it happens. If `this` is not found In the ways outlined above, then `this` will default to the `window` object.
 
-This will throw an `TypeError` in `strict mode` though.
+This will throw a `TypeError` in `strict mode` though.
 
 <br>
 
