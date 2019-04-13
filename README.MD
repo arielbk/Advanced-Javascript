@@ -41,6 +41,7 @@ I am trying to get a better understanding by explaining things in my own terms a
   - [ES6 classes](#es6-classes)
   - [Native Prototypes](#native-prototypes)
   - [Some tricky stuff](#some-tricky-stuff)
+    - [Arrow functions](#arrow-functions)
 - [Private and Public Class Fields](#private-and-public-class-fields)
   - [Class field declarations proposal in ESNext](#class-field-declarations-proposal-in-esnext)
   - [React](#react)
@@ -54,12 +55,12 @@ I am trying to get a better understanding by explaining things in my own terms a
 - [JavaScript Modules](#javascript-modules)
   - [Modular design](#modular-design)
   - [Implementing modules](#implementing-modules)
-    - [Leading through the evolution of modules in JavaScript](#leading-through-the-evolution-of-modules-in-javascript)
+    - [The evolution of modules in JavaScript](#the-evolution-of-modules-in-javascript)
   - [Global App component](#global-app-component)
   - [IIFE Module Pattern](#iife-module-pattern)
   - [Common JS](#common-js)
     - [Some problems](#some-problems)
-    - [Module bundlers](#module-bundlers)
+  - [Module bundlers](#module-bundlers)
   - [ES Modules](#es-modules)
 - [Create your own array](#create-your-own-array)
   - [Defining the array prototype](#defining-the-array-prototype)
@@ -70,6 +71,7 @@ I am trying to get a better understanding by explaining things in my own terms a
     - [Defining the `.map()` method](#defining-the-map-method)
     - [Defining the `.find()` method](#defining-the-find-method)
     - [Defining the `.reduce()` method](#defining-the-reduce-method)
+  - [Now putting it all together into a single ES6 Class:](#now-putting-it-all-together-into-a-single-es6-class)
 
 <br>
 
@@ -246,7 +248,7 @@ Callbacks are everywhere:
 The asynchronous nature of callbacks can lead to an endless cascade of callback functions that trigger one another in a huge unreadable waterfall of code... ***callback hell!***
 
 ## Some solutions
-Modularize your code (split things into their own functions) — although this can still be unintuitive.
+One way is to modularize your code (split things out into their own functions) — although this can still be unintuitive.
 
 A problem with passing callback functions to a 3rd party library is that it gives the control over to that library to deal with the callback responsibly.
 
@@ -272,26 +274,30 @@ promise
   .catch(onError);
 ```
 
-The real power of promises comes with *chaining* (`.then().then().then()`). Every step is transformed into a promise.
+The real power of promises comes with *chaining* (`.then().then().then()`). Every step gets transformed into a promise.
 
-If we need to pass things along the chain (other than the just the returned value of the previous promise) then we simply pass it into the `resolve()` function of the promise to pass on.
+If we need to pass things along the chain (other than just the returned value of the previous promise) then we simply pass it into the `resolve()` function of the promise to pass on.
 
 ## Async / Await
 
 If we prepend `async` to a function it is *always* going to return a promise, even if there is an explicitly set return value.
 
 ```js
+// this will return a promise
 async function add(x, y) {
+  // we *could* await some other things in here
   return x + y;
 }
 
-// it returns a promise, so we need `.then()` to get the return value
+// we need `.then()` to get the return value
 add(2, 3).then(result => console.log(result));
 ```
 
+I think a real advantage of async/await is that it just reads so nicely. It's intuitive, because it makes it _seem_ more synchronous. It's close to reading the code top to bottom, and this makes it easier to understand.
+
 ### Error handling with Async/Await
-Either use a .catch() where the function is invoked<br>
-If that's not possible then we can use a try / catch block within the function itself.
+Either use a `.catch()` where the function is invoked —<br>
+if that's not possible then use a try / catch block within the function itself.
 
 <br>
 
@@ -299,7 +305,7 @@ If that's not possible then we can use a try / catch block within the function i
 
 ## Instantiation patterns in JavaScript
 
-First there is just creating an object from a simply function constructor. It returns a new object. This can be cumbersome because every property must be explicitly defined.
+First, there is just creating an object from a simple function constructor. It returns a new object. This can be cumbersome because every property must be explicitly defined.
 
 ```js
 const child = Object.create(parent);
@@ -310,7 +316,7 @@ This is a solution to that problem. Any lookup on `child` will first happen on t
 
 A `prototype` is a property that every JavaScript function has that points to an object.
 
-It allows us to access a prototypes methods from any instantiation, without defining it in a separate object.
+It allows us to access a prototype's methods from any instantiation, without defining it in a separate object.
 
 (At this point we are using `Object.create(animals.prototype)` to get the methods on the constructor).
 
@@ -320,7 +326,7 @@ The `new` keyword makes things easier for us.
 
 When we invoke a constructor with `new` it automatically adds the prototype methods, and creates a new `this` within the constructor function.
 
-When I started learning JS, this was the first kind of instatiation I learnt:
+When I started learning JS, this was the first kind of instantiation I learnt:
 
 ```js
 function Person (name) {
@@ -356,7 +362,7 @@ class Person {
 
 This looks so much nicer, doesn't it? I think it's important to remember that JavaScript is still a prototypal language, and not a class based language like Java. That means: ***this is just syntactic sugar***.
 
-It is much more readable, but it is important to keep in mind what is really happening under the hood (as the instantiation patterns before this teach us).
+It is much more readable, but it is important to keep in mind what is really happening under the hood (as the instantiation patterns before this teaches us).
 
 ## Native Prototypes
 
@@ -380,9 +386,10 @@ We can then use `object.hasOwnProperty()` to check if the property actually exis
 arielbk instanceof Person // true
 ```
 
+### Arrow functions
 Arrow functions cannot be constructors because they have no `this` keyword — it will just throw an error!
 
-Arrow functions actually have no constructor property.
+> Arrow functions actually have no constructor property.
 
 <br>
 
@@ -399,9 +406,9 @@ It's already in Babel — that's why it's being used all the time in React land 
 
 ## React
 
-Defining the state in constructor? With Babel we can now just declare state: `state = {}`.
+Defining the state in constructor? With Babel we can now just declare state: `state = {}`
 
-Another part of this stage 3 TC39 proposal is defining static objects in the class body. This is now being used a lot with
+Another part of this stage 3 TC39 proposal is defining static objects in the class body. This is now being used a lot with:
 ```js
 static propTypes = {};
 static defaultProps = {};
@@ -418,6 +425,8 @@ Whereas normally the function would be stored once in the prototype of the objec
 
 ## Private fields
 
+This is a feature that allows us to make some fields private. So, an instance can only access `milesDriven` through the `milesDriven()` class method here. This is extremely useful for security.
+
 ```js
 class Car {
   #milesDriven = 0;
@@ -430,8 +439,6 @@ class Car {
 }
 ```
 
-This is a feature that allows us to make some fields private. So, an instance can only access `milesDriven` through the `milesDriven()` class method here. This is extremely useful for security.
-
 There is a currently a [pull request](https://github.com/babel/proposals/issues/12) to bring this into Babel.
 
 <br>
@@ -440,10 +447,9 @@ There is a currently a [pull request](https://github.com/babel/proposals/issues/
 
 ## Chaining inheritance
 
-This is really tricky stuff using pre-ES6 JavaScript, but good to understand a little bit more about what is going on under the hood.
+This is really tricky stuff using pre-ES6 JavaScript, but good to understand a little bit more to get an understanding of what is going on under the hood.
 
 Here is my own contrived example, to get an idea of how it is done:
-
 ```js
 // This is the parent class
 function Vehicle (hasMotor, color) {
@@ -458,32 +464,31 @@ Vehicle.prototype.move = function() {
 // Now we begin to chain this class
 // Car is a subclass of Vehicle
 function Car (color, make) {
-  // allows the `this` to be bound to the Vehicle constructor function
-  // sets hasMotor to true
+  /* allows the `this` to be bound to the Vehicle constructor function and sets hasMotor to true */
   Vehicle.call(this, true, color);
   this.make = make;
 }
 
-// Allows lookup to continue up the chain
+// Allows lookup to continue up the chain to the prototype object
 Car.prototype = Object.create(Vehicle.prototype);
 
-// Adding a method specific to just the Dog prototype
+/* Adding a method specific to just the Car prototype (not it's parent, Vehicle */
 Car.prototype.honk = function() {
   console.log(`beep! I'm a ${this.color} ${this.make}`);
 }
 
-// This is necessary, otherwise it will point to the Vehicle constructor 
+// This is necessary, otherwise it will point to the Vehicle constructor
 Car.prototype.constructor = Car;
 
 const myCar = new Car('blue', 'mercedes');
 
-// Calls a method inherited from the grandparent Vehicle class
+// Calls a method inherited from the *grandparent* Vehicle class
 console.log(myCar.move()); // logs 'moving!'
 // Calls a method inherited from the parent Car class
 console.log(myCar.honk()); // logs 'beep! I'm a blue mercedes'
 ```
 
-That was a lot to wrap my head around and definitely not simple or intuitive. It gives me a deep appreciation for ES6 classes abstracting it away.
+That was a lot to wrap my head around and definitely not simple or intuitive. It gives me a real appreciation for ES6 classes abstracting it away...
 
 ## Inheritance with ES6 Classes
 
@@ -543,20 +548,20 @@ Some benefits of modular design:
   
 - **Isolation** — Different developers can work on different parts of the code, pieces can be tested for their specific function
   
-- **Organisation** — Modules provide an obvious point of separation between thing
+- **Organisation** — Modules provide an obvious point of separation between things
 
 Modularity in programming:
 - Imports (*dependencies*)
 - Code
 - Exports
 
-NPM packages are a well-known example of modules that have been packaged and shared. With it we can focus on how the pieces work together, we can build on the shoulders of giants for some things so that we don't get caught up in the smaller implementation details.
+NPM packages are a well-known example of modules that have been packaged and shared. With it we can focus on how the pieces work synergistically, not reinventing the wheel but putting together pieces that have come before.
 
 ## Implementing modules
 
-### Leading through the evolution of modules in JavaScript
+### The evolution of modules in JavaScript
 
-Intuition may tell us to just separate code into files. This is a good start but if we do that and just import the files into the html then everything uses the global namespace.
+Intuition may tell us to just separate code into files. This is a good start but if we do that and just import the files into the HTML then everything uses the global namespace.
 
 This is dangerous because we could easily run into naming collisions, especially as an app gets larger, or if we want to bring in more and more modules.
 
@@ -580,7 +585,7 @@ So now there is only the main app component taking up the global namespace. This
 
 Another issue is that the order of loading in the script tags matters, so it could get tricky — especially working with a team.
 
-So far it is the best solution...
+Up to here, it is the best solution.
 
 ## Common JS
 
@@ -601,9 +606,9 @@ Browsers don't support it natively and it's synchronous (this means that it is b
 
 This is where a module bundler comes in!
 
-### Module bundlers
+## Module bundlers
 
-The module bunders brings in all the modules and creates a single *intelligently* bundled js file.
+The module bundler brings in all the modules and creates a single *intelligently* bundled js file.
 
 **Webpack** is a well-known example of a module bundler.
 
@@ -625,9 +630,9 @@ With that, we can just import a single bundled JS file into our HTML.
 
 ## ES Modules
 
-This is a part of ES6 and is supported by most modern web browsers apart from IE11.
+This is a part of ES6 and is supported by most modern web browsers apart from IE11 😅 
 
-What's great is that it supports async.
+A great thing about it is that it supports async.
 
 This is what we use in React now.
 
@@ -653,7 +658,7 @@ I haven't used es6 modules outside of React, but to use it in a page we actually
 
 # Create your own array
 
-So basically, this is a practice exercise to practice some of the ideas from this course.
+So basically, this is a chance to practice some of the ideas outline so far.
 
 The goal is to create an Array prototype with the following methods on it:
 - `.push()`
@@ -844,3 +849,9 @@ array.prototype.reduce = function (reducer, initialValue) {
 ```
 
 🙌 🚀
+
+
+## Now putting it all together into a single ES6 Class:
+```js
+TBD
+```
