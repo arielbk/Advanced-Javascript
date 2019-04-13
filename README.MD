@@ -848,10 +848,123 @@ array.prototype.reduce = function (reducer, initialValue) {
 }
 ```
 
-🙌 🚀
-
 
 ## Now putting it all together into a single ES6 Class:
 ```js
-TBD
+class Array {
+  constructor(...args) {
+    // length prop is non-numerable
+    Object.defineProperty(this, 'length', {
+      value: 0,
+      enumerable: false,
+      writable: true
+    });
+
+    // this is kind of weird, because it's using an actual array and array method...
+    args.forEach(arg => {
+      this[args.indexOf(arg)] = arg;
+      this.length += 1;
+    })
+  }
+
+  push = (element) => {
+    // add on the element
+    this[this.length] = element;
+    // increment the length
+    this.length++;
+
+    // return the length
+    return this.length;
+  }
+
+  pop = () => {
+    // decrement the length
+    this.length--;
+    // save the element to remove to return it
+    const elementToRemove = this[this.length];
+    // remove the last element
+    delete this[this.length];
+
+    //  return the element that was removed
+    return elementToRemove;
+  }
+
+  filter = (cb) => {
+    // the results will be a new array
+    let results = array();
+
+    for (let index in this) {
+      // making sure the property belongs to this instance
+      if (this.hasOwnProperty(index)) {
+        const element = this[index];
+
+        // if running the callback returns truthy value
+        if (cb(element, index)) {
+          result.push(element);
+        }
+      }
+    }
+
+    // finally, return the result
+    return results;
+  }
+
+  map = (cb) => {
+    // result will be a new array
+    let results = new Array;
+
+    for (let index in this) {
+      // making sure the property belongs to this instance
+      if (this.hasOwnProperty(index)) {
+        const element = this[index];
+
+        // assign whatever is returned from the cb
+        results.push(cb(element, index));
+      }
+    }
+
+    return results;
+  }
+
+  find = (cb) => {
+    // result will be a new array
+    let results = array();
+
+    for (let index in this) {
+      // making sure the property belongs to this instance
+      if (this.hasOwnProperty(index)) {
+        const element = this[index];
+
+        // if cb resolves to true, return and end
+        if (cb(element, index)) return element;
+      }
+    }
+
+    // if nothing was found, return undefined
+    return undefined;
+  }
+
+  reduce = (reducer, initialValue) => {
+    // define the source array
+    const src = this;
+    // accumulator is derived from initialValue
+    let acc = initialValue || 0;
+
+    for (let idx in this) {
+      // making sure the property belongs to this instance
+      if (this.hasOwnProperty(idx)) {
+        // define current value
+        const cur = this[idx];
+
+        // all variables are now set
+        // run the reducer on accumulator
+        acc = reducer(acc, cur, idx, src);
+      }
+    }
+    // return the accumulator
+    return acc;
+  }
+}
 ```
+
+🙌 🚀
